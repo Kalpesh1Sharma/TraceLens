@@ -52,6 +52,12 @@ class TraceIssue(BaseModel):
     events: list[TraceEvent]
 
 
+class ExplainedTraceIssue(TraceIssue):
+    """A detected issue enriched with a developer-facing explanation."""
+
+    ai_explanation: str
+
+
 def build_trace_tree(events: list[TraceEvent]) -> list[TraceNode]:
     """Build a timestamp-sorted forest from the events in one run.
 

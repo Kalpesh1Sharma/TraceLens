@@ -28,6 +28,22 @@ SQLite data is stored in `tracelens.db` beside the application.
   `tree`, a timestamp-sorted parent/child reconstruction of those events.
 - `GET /traces/{run_id}/issues` returns retry loops, tool-call errors, and
   timeouts. Use `?timeout_threshold_ms=7500` to override the 5000ms default.
+- `GET /traces/{run_id}/issues/explained` returns the same issues enriched with
+  a plain-English `ai_explanation` field.
+
+## AI explanations
+
+To enable Groq-generated explanations, set an API key before starting Uvicorn:
+
+```powershell
+$env:GROQ_API_KEY = "your-groq-api-key"
+uvicorn main:app --reload
+```
+
+TraceLens uses `llama-3.3-70b-versatile` through the Groq Python SDK. The
+prompt is restricted to the detector output and associated event data. If
+`GROQ_API_KEY` is not set, startup logs that TraceLens is using its rule-based
+fallback explainer; all explanation endpoints continue to work offline.
 
 ## Demo data and detector check
 

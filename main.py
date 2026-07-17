@@ -2,16 +2,24 @@
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Query, status
+from fastapi import FastAPI, Query, Request, status
 
 from detectors import detect_issues
-from schemas import RunTracesResponse, TraceEvent, TraceIssue, build_trace_tree
+from explainer import Explainer, create_explainer
+from schemas import (
+    ExplainedTraceIssue,
+    RunTracesResponse,
+    TraceEvent,
+    TraceIssue,
+    build_trace_tree,
+)
 from storage import storage
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     storage.create_tables()
+    app.state.explainer = create_explainer()
     yield
 
 
@@ -45,6 +53,28 @@ def get_run_issues(
 ) -> list[TraceIssue]:
     """Run all failure detectors against a run's stored events."""
     return detect_issues(storage.get_run_events(run_id), timeout_threshold_ms)
+
+
+@app.get(
+    "/traces/{run_id}/issues/explained",
+    response_model=list[ExplainedTraceIssue],
+    summary="Detect failures and explain them for developers",
+)
+def get_explained_run_issues(
+    run_id: str,
+    request: Request,
+    timeout_threshold_ms: float = Query(default=5000.0, ge=0),
+) -> list[ExplainedTraceIssue]:
+    """Run all detectors, then add provider-neutral developer explanations."""
+    explainer: Explainer = request.app.state.explainer
+    issues = detect_issues(storage.get_run_events(run_id), timeout_threshold_ms)
+    return [
+        ExplainedTraceIssue(
+            **issue.model_dump(),
+            ai_explanation=explainer.explain(issue),
+        )
+        for issue in issues
+    ]
 
 
 @app.get(
