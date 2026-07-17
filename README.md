@@ -26,6 +26,23 @@ SQLite data is stored in `tracelens.db` beside the application.
 - `POST /traces/ingest` validates and stores one trace event.
 - `GET /traces/{run_id}` returns `events`, a complete timestamp-sorted list, and
   `tree`, a timestamp-sorted parent/child reconstruction of those events.
+- `GET /traces/{run_id}/issues` returns retry loops, tool-call errors, and
+  timeouts. Use `?timeout_threshold_ms=7500` to override the 5000ms default.
+
+## Demo data and detector check
+
+With the API running, post two deterministic demo runs (one retry loop and one
+tool error plus a timeout):
+
+```powershell
+python toy_agent.py
+```
+
+Run the detector check without starting the API:
+
+```powershell
+python -m unittest discover -s tests -v
+```
 
 Example event:
 

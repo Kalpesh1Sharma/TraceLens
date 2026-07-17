@@ -43,6 +43,15 @@ class RunTracesResponse(BaseModel):
     tree: list[TraceNode]
 
 
+class TraceIssue(BaseModel):
+    """A potential failure found while analysing a run."""
+
+    step_id: str
+    issue_type: Literal["retry_loop", "tool_call_error", "silent_timeout"]
+    explanation: str
+    events: list[TraceEvent]
+
+
 def build_trace_tree(events: list[TraceEvent]) -> list[TraceNode]:
     """Build a timestamp-sorted forest from the events in one run.
 

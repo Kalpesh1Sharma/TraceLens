@@ -2,9 +2,10 @@
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, status
+from fastapi import FastAPI, Query, status
 
-from schemas import RunTracesResponse, TraceEvent, build_trace_tree
+from detectors import detect_issues
+from schemas import RunTracesResponse, TraceEvent, TraceIssue, build_trace_tree
 from storage import storage
 
 
@@ -31,6 +32,19 @@ app = FastAPI(
 def ingest_trace(event: TraceEvent) -> TraceEvent:
     """Validate and persist one event from an agent run."""
     return storage.store(event)
+
+
+@app.get(
+    "/traces/{run_id}/issues",
+    response_model=list[TraceIssue],
+    summary="Detect failures in a run",
+)
+def get_run_issues(
+    run_id: str,
+    timeout_threshold_ms: float = Query(default=5000.0, ge=0),
+) -> list[TraceIssue]:
+    """Run all failure detectors against a run's stored events."""
+    return detect_issues(storage.get_run_events(run_id), timeout_threshold_ms)
 
 
 @app.get(
