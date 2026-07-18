@@ -1,7 +1,7 @@
 """Post deterministic demo agent traces to a running TraceLens API.
 
 Run ``uvicorn main:app --reload`` first, then execute
-``python toy_agent.py``. The script posts a retry-loop run and an error run.
+``python toy_agent.py``. The script posts retry, error, and mixed-failure runs.
 """
 
 import json
@@ -14,10 +14,11 @@ from schemas import TraceEvent
 
 
 def build_demo_runs() -> dict[str, list[TraceEvent]]:
-    """Build two realistic, deterministic runs with intentional failures."""
+    """Build deterministic agent runs with intentional failures."""
     started_at = datetime(2026, 7, 17, 12, 0, tzinfo=timezone.utc)
     retry_run_id = "demo-retry-loop"
     error_run_id = "demo-tool-error"
+    mixed_run_id = "demo-mixed-failures"
 
     retry_events = [
         TraceEvent(
@@ -125,7 +126,77 @@ def build_demo_runs() -> dict[str, list[TraceEvent]]:
             parent_step_id="error-decide",
         ),
     ]
-    return {retry_run_id: retry_events, error_run_id: error_events}
+
+    mixed_failure_events = [
+        TraceEvent(
+            agent_id="support-triage-agent",
+            run_id=mixed_run_id,
+            step_id="support-classify-ticket",
+            step_type="decision",
+            input={
+                "ticket_id": "CS-1042",
+                "subject": "Unable to update my billing address",
+            },
+            output={"category": "billing", "priority": "normal"},
+            timestamp=started_at + timedelta(minutes=2),
+            latency_ms=31.0,
+            status="success",
+            parent_step_id=None,
+        ),
+        TraceEvent(
+            agent_id="support-triage-agent",
+            run_id=mixed_run_id,
+            step_id="support-lookup-customer",
+            step_type="tool_call",
+            input={"tool": "crm_lookup", "customer_id": "cust_8841"},
+            output={"plan": "pro", "account_status": "active"},
+            timestamp=started_at + timedelta(minutes=2, seconds=1),
+            latency_ms=145.0,
+            status="success",
+            parent_step_id="support-classify-ticket",
+        ),
+        TraceEvent(
+            agent_id="support-triage-agent",
+            run_id=mixed_run_id,
+            step_id="support-draft-response",
+            step_type="llm_call",
+            input={"template": "billing_address_update", "tone": "helpful"},
+            output={},
+            timestamp=started_at + timedelta(minutes=2, seconds=2),
+            latency_ms=7400.0,
+            status="timeout",
+            parent_step_id="support-lookup-customer",
+        ),
+        TraceEvent(
+            agent_id="support-triage-agent",
+            run_id=mixed_run_id,
+            step_id="support-send-response",
+            step_type="tool_call",
+            input={"tool": "send_email", "ticket_id": "CS-1042", "source": "fallback"},
+            output={"error": "Email provider rejected the recipient address."},
+            timestamp=started_at + timedelta(minutes=2, seconds=3),
+            latency_ms=210.0,
+            status="error",
+            parent_step_id="support-draft-response",
+        ),
+        TraceEvent(
+            agent_id="support-triage-agent",
+            run_id=mixed_run_id,
+            step_id="support-record-followup",
+            step_type="decision",
+            input={"send_status": "error", "ticket_id": "CS-1042"},
+            output={"action": "queue_human_followup"},
+            timestamp=started_at + timedelta(minutes=2, seconds=4),
+            latency_ms=18.0,
+            status="success",
+            parent_step_id="support-send-response",
+        ),
+    ]
+    return {
+        retry_run_id: retry_events,
+        error_run_id: error_events,
+        mixed_run_id: mixed_failure_events,
+    }
 
 
 def post_event(event: TraceEvent, api_base_url: str) -> None:

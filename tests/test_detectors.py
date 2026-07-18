@@ -31,6 +31,24 @@ class DetectorTests(unittest.TestCase):
             )
         )
 
+    def test_mixed_support_run_detects_timeout_and_tool_error(self) -> None:
+        mixed_issues = detect_issues(build_demo_runs()["demo-mixed-failures"])
+
+        self.assertTrue(
+            any(
+                issue.issue_type == "silent_timeout"
+                and issue.step_id == "support-draft-response"
+                for issue in mixed_issues
+            )
+        )
+        self.assertTrue(
+            any(
+                issue.issue_type == "tool_call_error"
+                and issue.step_id == "support-send-response"
+                for issue in mixed_issues
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

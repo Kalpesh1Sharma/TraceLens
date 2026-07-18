@@ -48,8 +48,9 @@ fallback explainer; all explanation endpoints continue to work offline.
 
 ## Demo data and detector check
 
-With the API running, post two deterministic demo runs (one retry loop and one
-tool error plus a timeout):
+With the API running, post deterministic demo runs: a retry loop, a tool error
+plus timeout, and a support-triage run that combines a timeout and tool-call
+error with healthy steps:
 
 ```powershell
 python toy_agent.py
@@ -67,7 +68,8 @@ Open `/ui` to load a run as a step-by-step timeline. Flagged steps are shown
 with a warning treatment; click one to reveal its issue type and explanation.
 After posting the demo data with `python toy_agent.py`, use either quick-load
 button to inspect `demo-retry-loop` or `demo-tool-error` without entering a run
-ID manually.
+ID manually. The third button loads `demo-mixed-failures`, a customer-support
+triage run containing both a silent timeout and a tool-call error.
 
 Example event:
 
