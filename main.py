@@ -1,6 +1,7 @@
 """FastAPI application for ingesting and inspecting AI agent traces."""
 
 from contextlib import asynccontextmanager
+import logging
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -20,15 +21,32 @@ from schemas import (
     build_trace_tree,
 )
 from storage import storage
+from toy_agent import build_demo_runs
 
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
+logger = logging.getLogger(__name__)
+
+
+def seed_demo_runs() -> int:
+    """Persist the built-in demo traces directly through the storage boundary."""
+    event_count = 0
+    for events in build_demo_runs().values():
+        for event in events:
+            storage.store(event)
+            event_count += 1
+    return event_count
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     storage.create_tables()
+    if storage.is_empty():
+        seeded_events = seed_demo_runs()
+        logger.info("TraceLens seeded %s demo trace events into an empty database.", seeded_events)
+    else:
+        logger.info("TraceLens found existing trace data; skipping demo seeding.")
     app.state.explainer = create_explainer()
     yield
 

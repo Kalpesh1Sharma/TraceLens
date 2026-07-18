@@ -44,6 +44,12 @@ class TraceStorage:
     def create_tables(self) -> None:
         Base.metadata.create_all(self.engine)
 
+    def is_empty(self) -> bool:
+        """Return whether this backend contains no stored trace events."""
+        statement = select(TraceEventRecord.id).limit(1)
+        with self.session_factory() as session:
+            return session.scalar(statement) is None
+
     def store(self, event: TraceEvent) -> TraceEvent:
         record = TraceEventRecord(
             agent_id=event.agent_id,

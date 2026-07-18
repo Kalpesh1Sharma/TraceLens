@@ -55,11 +55,15 @@ Then open:
 
 ### Try the demo scenarios
 
+On first startup with an empty database, TraceLens automatically seeds all
+three demo runs. Use the UI quick-load buttons immediately, or run the script
+below when posting those same scenarios to another running API:
+
 ```bash
 python toy_agent.py
 ```
 
-This posts three pre-built demo runs to the local database. Then in `/ui`, click any of the three "Load demo-..." quick-load buttons:
+Then in `/ui`, click any of the three "Load demo-..." quick-load buttons:
 - `demo-retry-loop` — a research agent stuck retrying a search
 - `demo-tool-error` — a research agent hitting a parser error
 - `demo-mixed-failures` — a customer-support triage agent with a timeout and a tool error in the same run
