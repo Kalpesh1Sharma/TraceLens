@@ -19,6 +19,7 @@ uvicorn main:app --reload
 ```
 
 The interactive API documentation is available at `http://127.0.0.1:8000/docs`.
+The trace replay UI is available at `http://127.0.0.1:8000/ui`.
 SQLite data is stored in `tracelens.db` beside the application.
 
 ## Endpoints
@@ -59,6 +60,14 @@ Run the detector check without starting the API:
 ```powershell
 python -m unittest discover -s tests -v
 ```
+
+## Trace replay UI
+
+Open `/ui` to load a run as a step-by-step timeline. Flagged steps are shown
+with a warning treatment; click one to reveal its issue type and explanation.
+After posting the demo data with `python toy_agent.py`, use either quick-load
+button to inspect `demo-retry-loop` or `demo-tool-error` without entering a run
+ID manually.
 
 Example event:
 

@@ -73,10 +73,13 @@ class GroqExplainer:
                     {
                         "role": "system",
                         "content": (
-                            "Explain an observed TraceLens failure for a developer. "
-                            "Use only the supplied JSON facts. Do not infer an unshown "
-                            "root cause. In at most two sentences, state what happened and "
-                            "one next debugging or fix action grounded in those facts."
+                            "Explain an observed TraceLens failure for a developer. Use only "
+                            "the supplied JSON facts: status values are literal, and empty "
+                            "results are not errors unless status says error. Do not infer a "
+                            "root cause, configuration problem, or unrecorded behavior. In at "
+                            "most two sentences, state the recorded failure and one directly "
+                            "grounded next action (for example, inspect recorded output, add a "
+                            "retry limit, or ensure a timeout path returns an explicit result)."
                         ),
                     },
                     {"role": "user", "content": context},

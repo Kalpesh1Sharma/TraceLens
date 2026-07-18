@@ -1,11 +1,14 @@
 """FastAPI application for ingesting and inspecting AI agent traces."""
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, Query, Request, status
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from detectors import detect_issues
 from explainer import Explainer, create_explainer
@@ -17,6 +20,10 @@ from schemas import (
     build_trace_tree,
 )
 from storage import storage
+
+
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
 
 
 @asynccontextmanager
@@ -32,6 +39,19 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def root() -> dict[str, str]:
+    """Expose the API's most useful entry points."""
+    return {"service": "TraceLens", "ui": "/ui", "docs": "/docs"}
+
+
+@app.get("/ui", include_in_schema=False)
+def trace_replay_ui() -> FileResponse:
+    """Serve the dependency-free trace replay interface."""
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.post(
