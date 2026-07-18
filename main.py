@@ -2,6 +2,9 @@
 
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, Query, Request, status
 
 from detectors import detect_issues
