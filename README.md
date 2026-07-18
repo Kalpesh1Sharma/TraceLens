@@ -1,5 +1,9 @@
 # TraceLens
 
+**Live demo:** https://tracelens-7in7.onrender.com/ui
+
+**Codex Session ID:** 019f703d-897d-73a3-8aa1-c1869ec31058
+
 **AI Agent Debugger** — Debug AI agent workflows like you debug code.
 
 TraceLens is an observability and debugging tool for AI agent runs. It captures every step of a multi-step agent execution, automatically detects common failure patterns (retry loops, tool-call errors, silent timeouts), and uses an LLM to generate plain-English explanations of what went wrong and what to do next — all viewable in a browser-based replay timeline.
