@@ -2,8 +2,6 @@
 
 **Live demo:** https://tracelens-7in7.onrender.com/ui
 
-**Codex Session ID:** 019f703d-897d-73a3-8aa1-c1869ec31058
-
 **AI Agent Debugger** — Debug AI agent workflows like you debug code.
 
 TraceLens is an observability and debugging tool for AI agent runs. It captures every step of a multi-step agent execution, automatically detects common failure patterns (retry loops, tool-call errors, silent timeouts), and uses an LLM to generate plain-English explanations of what went wrong and what to do next — all viewable in a browser-based replay timeline.
@@ -25,7 +23,11 @@ AI agents fail in ways that are hard to see. A retry loop silently burns time an
 
 ## Screenshots
 
-*(Add screenshots or a short GIF of `/ui` here before submitting — this significantly helps judges skimming quickly.)*
+![TraceLens replay UI landing page with demo run quick-load buttons](screenshots/ui-landing.png)
+
+![Trace timeline showing a flagged retry-loop step in red](screenshots/ui-flagged-step.png)
+
+![Expanded AI-generated explanation for a detected failure](screenshots/ui-explanation.png)
 
 ## Getting Started
 
@@ -111,7 +113,7 @@ Not everything worked on the first pass. After wiring up Groq, calls kept failin
 
 Codex/GPT-5.6 wrote effectively all production code in this repository. My role was product and architecture direction — defining the schema, scoping each build phase, specifying failure modes and edge cases for Codex to handle, verifying every claim Codex made through manual API testing and browser checks rather than trusting generated summaries alone, and debugging the one real integration issue that came up.
 
-**Codex Session ID:** *(add your primary session ID here before submitting)*
+**Codex Session ID:** 019f703d-897d-73a3-8aa1-c1869ec31058
 
 ## License
 
